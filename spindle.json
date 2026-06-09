@@ -1,0 +1,11 @@
+{
+  "identifier": "creator_notes_html_renderer",
+  "version": "1.0.0",
+  "name": "Creator Notes HTML Renderer",
+  "author": "Ptolemaios",
+  "description": "Renders HTML and CSS from a character's creator notes field as a live preview widget in the character editor.",
+  "permissions": ["ui_panels", "characters"],
+  "entry_backend": "dist/backend.js",
+  "entry_frontend": "dist/frontend.js",
+  "minimum_lumiverse_version": "1.0.0"
+}
