@@ -1,88 +1,76 @@
 import { sanitize } from "./sanitizer";
 
 export function setup(ctx) {
-  const widget = ctx.ui.createFloatWidget({
-    width: 480,
-    height: 400,
-    snapToEdge: true,
-    tooltip: "HTML Preview — Creator Notes"
+  const tab = ctx.ui.registerDrawerTab({
+    id: "html_preview",
+    title: "HTML Preview",
+    shortName: "Preview",
+    description: "Renders HTML and CSS from the creator notes field as a live preview.",
+    keywords: ["html", "css", "preview", "creator notes", "render"],
+    headerTitle: "HTML Preview",
+    iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
   });
 
-  const container = widget.root;
+  const root = tab.root;
+  root.style.cssText = "display:flex;flex-direction:column;height:100%;";
 
-  function showContent(html) {
-    if (container) {
-      container.innerHTML = renderPreview(html);
-    }
+  const header = document.createElement("div");
+  header.style.cssText = "display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--color-border,#27272a);font-size:12px;opacity:0.6;flex-shrink:0;";
+  header.innerHTML = '<span style="font-weight:600;">HTML Preview</span><span style="flex:1;"></span><span>Creator Notes</span>';
+  root.appendChild(header);
+
+  const iframeContainer = document.createElement("div");
+  iframeContainer.style.cssText = "flex:1;overflow:hidden;";
+  root.appendChild(iframeContainer);
+
+  function renderContent(html) {
+    const safe = sanitize(html);
+    iframeContainer.innerHTML = '';
+    const iframe = document.createElement("iframe");
+    iframe.sandbox.add();
+    iframe.style.cssText = "width:100%;height:100%;border:none;background:var(--color-surface,#18181b);";
+    iframe.srcdoc = safe;
+    iframeContainer.appendChild(iframe);
   }
 
-  async function loadCreatorNotes(characterId) {
+  function showError(msg) {
+    iframeContainer.innerHTML = `<p style="color:#f87171;padding:12px;">${msg}</p>`;
+  }
+
+  function showPlaceholder(msg) {
+    iframeContainer.innerHTML = `<p style="opacity:0.5;padding:12px;">${msg}</p>`;
+  }
+
+  async function loadCreatorNotes() {
+    const { characterId } = ctx.getActiveChat();
+    if (!characterId) {
+      showPlaceholder("Open a character in the editor to see a live HTML preview of their creator notes.");
+      return;
+    }
+
     try {
       const card = await ctx.characters.get(characterId);
+      console.log("[HTML Preview] ctx.characters.get returned:", card);
       const creatorNotes = card.creator_notes ?? "";
-      showContent(creatorNotes || "<p style='opacity:0.5'>Creator notes are empty.</p>");
+      if (!creatorNotes) {
+        showPlaceholder("Creator notes are empty.");
+      } else {
+        renderContent(creatorNotes);
+      }
     } catch (err) {
-      showContent(`<p style="color:#f87171">Failed to read creator notes: ${err}</p>`);
+      console.error("[HTML Preview] Failed to read character:", err);
+      showError(`Failed to read creator notes: ${err}`);
     }
   }
 
-  const { characterId } = ctx.getActiveChat();
-  if (characterId) {
-    loadCreatorNotes(characterId);
-  } else {
-    showContent("<p style='opacity:0.5'>Open a character in the editor to see a live HTML preview of their creator notes.</p>");
-  }
+  loadCreatorNotes();
+
+  const unsubActivate = tab.onActivate(() => {
+    loadCreatorNotes();
+  });
 
   return () => {
-    try { widget.destroy(); } catch (_) {}
+    try { unsubActivate(); } catch (_) {}
+    try { tab.destroy(); } catch (_) {}
   };
-}
-
-function renderPreview(raw) {
-  const safe = sanitize(raw);
-
-  return `
-    <div style="
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      font-family: var(--font-sans, sans-serif);
-      color: var(--color-text, #e4e4e7);
-      background: var(--color-surface, #18181b);
-      border-radius: 8px;
-      overflow: hidden;
-    ">
-      <div style="
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 12px;
-        border-bottom: 1px solid var(--color-border, #27272a);
-        font-size: 12px;
-        opacity: 0.6;
-      ">
-        <span style="font-weight:600;">HTML Preview</span>
-        <span style="flex:1;"></span>
-        <span>Creator Notes</span>
-      </div>
-      <iframe
-        sandbox=""
-        style="
-          flex: 1;
-          border: none;
-          width: 100%;
-          background: var(--color-surface, #18181b);
-        "
-        srcdoc="${escapeAttr(safe)}"
-      ></iframe>
-    </div>
-  `;
-}
-
-function escapeAttr(str) {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
 }
