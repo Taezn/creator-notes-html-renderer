@@ -1,55 +1,44 @@
 import { sanitize } from "./sanitizer";
 
 export function setup(ctx) {
-  const widget = ctx.ui.registerFloatWidget({
-    id: "html_preview",
-    label: "HTML Preview",
-    icon: "code",
+  const widget = ctx.ui.createFloatWidget({
     width: 480,
     height: 400,
-    resizable: true,
-    snap: "right",
+    snapToEdge: true,
+    tooltip: "HTML Preview — Creator Notes"
   });
 
   const container = widget.root;
 
-  function requestCreatorNotes(characterId: string) {
-    ctx.sendToBackend({
-      type: "fetch_creator_notes",
-      character_id: characterId,
-    });
-  }
-
-  function showContent(html: string) {
+  function showContent(html) {
     if (container) {
       container.innerHTML = renderPreview(html);
     }
   }
 
-  const unsub = ctx.onBackendMessage((msg) => {
-    if (msg.type === "creator_notes_response") {
-      if (msg.error) {
-        showContent(`<p style="color:#f87171">Failed to read creator notes: ${msg.error}</p>`);
-      } else {
-        showContent(msg.creator_notes || "<p style='opacity:0.5'>Creator notes are empty.</p>");
-      }
+  async function loadCreatorNotes(characterId) {
+    try {
+      const card = await ctx.characters.get(characterId);
+      const creatorNotes = card.creator_notes ?? "";
+      showContent(creatorNotes || "<p style='opacity:0.5'>Creator notes are empty.</p>");
+    } catch (err) {
+      showContent(`<p style="color:#f87171">Failed to read creator notes: ${err}</p>`);
     }
-  });
+  }
 
-  const charId = ctx.getActiveCharacterId?.() ?? null;
-  if (charId) {
-    requestCreatorNotes(charId);
+  const { characterId } = ctx.getActiveChat();
+  if (characterId) {
+    loadCreatorNotes(characterId);
   } else {
     showContent("<p style='opacity:0.5'>Open a character in the editor to see a live HTML preview of their creator notes.</p>");
   }
 
   return () => {
-    try { unsub(); } catch (_) {}
-    try { widget.destroy?.(); } catch (_) {}
+    try { widget.destroy(); } catch (_) {}
   };
 }
 
-function renderPreview(raw: string): string {
+function renderPreview(raw) {
   const safe = sanitize(raw);
 
   return `
@@ -90,7 +79,7 @@ function renderPreview(raw: string): string {
   `;
 }
 
-function escapeAttr(str: string): string {
+function escapeAttr(str) {
   return str
     .replace(/&/g, "&amp;")
     .replace(/"/g, "&quot;")

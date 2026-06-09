@@ -379,52 +379,38 @@ function renderPreview(raw) {
 }
 
 export function setup(ctx) {
-  var container = null;
-
-  var widget = ctx.ui.registerFloatWidget({
-    id: "html_preview",
-    label: "HTML Preview",
-    icon: "code",
+  var widget = ctx.ui.createFloatWidget({
     width: 480,
     height: 400,
-    resizable: true,
-    snap: "right"
+    snapToEdge: true,
+    tooltip: "HTML Preview \u2014 Creator Notes"
   });
 
-  container = widget.root;
+  var container = widget.root;
 
-  function requestCreatorNotes(characterId) {
-    ctx.sendToBackend({
-      type: "fetch_creator_notes",
-      character_id: characterId
+  function showContent(html) {
+    if (container) {
+      container.innerHTML = renderPreview(html);
+    }
+  }
+
+  function loadCreatorNotes(characterId) {
+    ctx.characters.get(characterId).then(function(card) {
+      var creatorNotes = card.creator_notes ?? "";
+      showContent(creatorNotes || "<p style='opacity:0.5'>Creator notes are empty.</p>");
+    }).catch(function(err) {
+      showContent('<p style="color:#f87171">Failed to read creator notes: ' + err + "</p>");
     });
   }
 
-  function showPlaceholder(text) {
-    if (container) {
-      container.innerHTML = renderPreview(text);
-    }
-  }
-
-  var unsub = ctx.onBackendMessage(function(msg) {
-    if (msg.type === "creator_notes_response") {
-      if (msg.error) {
-        showPlaceholder('<p style="color:#f87171">Failed to read creator notes: ' + msg.error + "</p>");
-      } else {
-        showPlaceholder(msg.creator_notes || "<p style='opacity:0.5'>Creator notes are empty.</p>");
-      }
-    }
-  });
-
-  var charId = ctx.getActiveCharacterId ? ctx.getActiveCharacterId() : null;
-  if (charId) {
-    requestCreatorNotes(charId);
+  var activeChat = ctx.getActiveChat();
+  if (activeChat.characterId) {
+    loadCreatorNotes(activeChat.characterId);
   } else {
-    showPlaceholder("<p style='opacity:0.5'>Open a character in the editor to see a live HTML preview of their creator notes.</p>");
+    showContent("<p style='opacity:0.5'>Open a character in the editor to see a live HTML preview of their creator notes.</p>");
   }
 
   return function() {
-    try { unsub(); } catch (_) {}
-    try { widget.destroy?.(); } catch (_) {}
+    try { widget.destroy(); } catch (_) {}
   };
 }
