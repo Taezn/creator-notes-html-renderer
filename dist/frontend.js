@@ -357,11 +357,6 @@ export function setup(ctx) {
   var root = tab.root;
   root.style.cssText = "display:flex;flex-direction:column;height:100%;";
 
-  var header = document.createElement("div");
-  header.style.cssText = "display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--color-border,#27272a);font-size:12px;opacity:0.6;flex-shrink:0;";
-  header.innerHTML = '<span style="font-weight:600;">HTML Preview</span><span style="flex:1;"></span><span>Creator Notes</span>';
-  root.appendChild(header);
-
   var iframeContainer = document.createElement("div");
   iframeContainer.style.cssText = "flex:1;overflow:hidden;";
   root.appendChild(iframeContainer);
@@ -371,7 +366,7 @@ export function setup(ctx) {
     iframeContainer.innerHTML = '';
     var iframe = document.createElement("iframe");
     iframe.sandbox.add();
-    iframe.style.cssText = "width:100%;height:100%;border:none;background:var(--color-surface,#18181b);";
+    iframe.style.cssText = "width:100%;height:100%;border:none;background:transparent;";
     iframe.srcdoc = safe;
     iframeContainer.appendChild(iframe);
   }
@@ -394,7 +389,6 @@ export function setup(ctx) {
     }
 
     ctx.characters.get(characterId).then(function(card) {
-      console.log("[HTML Preview] ctx.characters.get returned:", card);
       var creatorNotes = card.creator_notes ?? "";
       if (!creatorNotes) {
         showPlaceholder("Creator notes are empty.");
@@ -402,19 +396,20 @@ export function setup(ctx) {
         renderContent(creatorNotes);
       }
     }).catch(function(err) {
-      console.error("[HTML Preview] Failed to read character:", err);
       showError("Failed to read creator notes: " + err);
     });
   }
 
   loadCreatorNotes();
 
-  var unsubActivate = tab.onActivate(function() {
-    loadCreatorNotes();
-  });
+  var unsubActivate = tab.onActivate(function() { loadCreatorNotes(); });
+  var unsubChatSwitched = ctx.events.on("CHAT_SWITCHED", function() { loadCreatorNotes(); });
+  var unsubCharEdited = ctx.events.on("CHARACTER_EDITED", function() { loadCreatorNotes(); });
 
   return function() {
     try { unsubActivate(); } catch (_) {}
+    try { unsubChatSwitched(); } catch (_) {}
+    try { unsubCharEdited(); } catch (_) {}
     try { tab.destroy(); } catch (_) {}
   };
 }
