@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "lumiverse-memory-books",
+      "name": "creator-notes-html-renderer",
       "devDependencies": {
         "lumiverse-spindle-types": "0.4.74",
         "typescript": "^5.9.3",
