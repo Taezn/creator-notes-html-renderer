@@ -363,7 +363,7 @@ export function setup(ctx) {
 
   function renderContent(html) {
     var safe = sanitize(html);
-    var doc = '<!DOCTYPE html><html style="color-scheme:dark light;"><head><style>html,body{margin:0;padding:0;background:transparent !important;color:inherit;white-space:pre-wrap;word-wrap:break-word;overflow-x:auto;filter:contrast(0.82) brightness(1.08);}*{max-width:100vw !important;box-sizing:border-box !important;max-height:100vh;}img{max-width:100% !important;height:auto !important;}body *{text-shadow:0 0 3px rgba(128,128,128,0.35),0 0 1px rgba(0,0,0,0.45);}</style></head><body>' + safe + '</body></html>';
+    var doc = '<!DOCTYPE html><html style="color-scheme:dark light;"><head><style>html,body{margin:0;padding:0;background:transparent !important;color:inherit;white-space:pre-wrap;word-wrap:break-word;overflow-x:auto;filter:contrast(0.88) brightness(1.06);}*{max-width:100vw !important;box-sizing:border-box !important;}img{max-width:100% !important;height:auto !important;}</style></head><body>' + safe + '</body></html>';
     iframeContainer.innerHTML = '';
     var iframe = document.createElement("iframe");
     iframe.sandbox.add();
