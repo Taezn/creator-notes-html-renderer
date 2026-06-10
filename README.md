@@ -10,18 +10,17 @@ The preview updates whenever the character data changes.
 
 ## Install
 
-1. Open the **Spindle Panel** (drawer → Extensions)
+1. Open the **Side Panel** (drawer → Extensions)
 2. Click **Add Extension** → **Install from Source**
 3. Paste the repo URL or point it at this directory via **Import Local**
-4. Review permissions and click **Install**
-5. Enable the extension and grant the `characters` permission (privileged — needs admin approval)
+4. Enable the extension and grant the `characters` and `UI` permissions
 
 ## Permissions
 
 | Permission | Why |
 |---|---|
-| `ui_panels` | Mount the float widget (auto-granted) |
-| `characters` | Read the active character's creator notes (privileged) |
+| `ui_panels` | Mount the float widget |
+| `characters` | Read the active character's creator notes |
 
 ## Usage
 
