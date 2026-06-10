@@ -61,7 +61,7 @@ The extension uses **three layers** of defense:
 
 2. **Allowlist sanitizer** — Tags, attributes, and URL protocols are all allowlisted. Unknown or dangerous tags are stripped (not escaped). Attributes are filtered individually. URLs are validated against a protocol allowlist. CSS inside `<style>` tags and `style=""` attributes gets its own sanitization pass.
 
-3. **Sandboxed iframe** — The rendered output goes into `<iframe sandbox="">` with **no sandbox flags** — no scripts, no forms, no same-origin access, no popups, no top-navigation. Even if something slips past the sanitizer, the iframe's sandbox prevents it from executing scripts, navigating away, or accessing the parent page.
+3. **Sandboxed iframe** — The rendered output goes into `<iframe sandbox="">` with **no sandbox flags** — no scripts, no forms, no same-origin access, no popups, no top-navigation. Even if something slips past the sanitizer, the iframe's sandbox should prevent it from executing scripts, navigating away, or accessing the parent page.
 
 ## Architecture
 
