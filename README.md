@@ -10,18 +10,17 @@ The preview updates whenever the character data changes.
 
 ## Install
 
-1. Open the **Spindle Panel** (drawer → Extensions)
+1. Open the **Side Panel** (drawer → Extensions)
 2. Click **Add Extension** → **Install from Source**
 3. Paste the repo URL or point it at this directory via **Import Local**
-4. Review permissions and click **Install**
-5. Enable the extension and grant the `characters` permission (privileged — needs admin approval)
+4. Enable the extension and grant the `characters` and `UI` permissions
 
 ## Permissions
 
 | Permission | Why |
 |---|---|
-| `ui_panels` | Mount the float widget (auto-granted) |
-| `characters` | Read the active character's creator notes (privileged) |
+| `ui_panels` | Mount the float widget |
+| `characters` | Read the active character's creator notes |
 
 ## Usage
 
@@ -61,7 +60,7 @@ The extension uses **three layers** of defense:
 
 2. **Allowlist sanitizer** — Tags, attributes, and URL protocols are all allowlisted. Unknown or dangerous tags are stripped (not escaped). Attributes are filtered individually. URLs are validated against a protocol allowlist. CSS inside `<style>` tags and `style=""` attributes gets its own sanitization pass.
 
-3. **Sandboxed iframe** — The rendered output goes into `<iframe sandbox="">` with **no sandbox flags** — no scripts, no forms, no same-origin access, no popups, no top-navigation. Even if something slips past the sanitizer, the iframe's sandbox prevents it from executing scripts, navigating away, or accessing the parent page.
+3. **Sandboxed iframe** — The rendered output goes into `<iframe sandbox="">` with **no sandbox flags** — no scripts, no forms, no same-origin access, no popups, no top-navigation. Even if something slips past the sanitizer, the iframe's sandbox should prevent it from executing scripts, navigating away, or accessing the parent page.
 
 ## Architecture
 
