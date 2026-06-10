@@ -20,7 +20,7 @@ export function setup(ctx) {
 
   function renderContent(html) {
     const safe = sanitize(html);
-    const doc = `<!DOCTYPE html><html style="color-scheme:dark light;overflow-x:auto;"><head><style>body{margin:0;padding:0;background:transparent !important;color:inherit;white-space:pre-wrap;word-wrap:break-word;min-width:fit-content;}</style></head><body>${safe}</body></html>`;
+    const doc = `<!DOCTYPE html><html style="color-scheme:dark light;overflow-x:auto !important;"><head><style>html,body{margin:0;padding:0;background:transparent !important;color:inherit;white-space:pre-wrap;word-wrap:break-word;min-width:fit-content;overflow-x:auto !important;}</style></head><body>${safe}</body></html>`;
     iframeContainer.innerHTML = '';
     const iframe = document.createElement("iframe");
     iframe.sandbox.add();
